@@ -29,6 +29,8 @@ class PriorityCounter(object):
 class PriorityDict(object):
     def __init__(self, priority_set=None):
         self.priority_set = set(priority_set) if priority_set else {1, 2, 3, 4, 5}
+        self.min_priority = min(self.priority_set)
+        self.max_priority = max(self.priority_set)
         for pr in self.priority_set:
             self[pr] = PriorityCounter()
 

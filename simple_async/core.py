@@ -14,7 +14,7 @@ class TaskInstance(object):
     def __init__(self, generator, func_name):
         self.generator = generator
         self.gen_inited = False  # нужен для реализации асинхроных ответов
-        self.__priority = 1
+        self.__priority = None
         self.last_time = datetime.now()
         self.finish = False
         self.__name__ = func_name
@@ -60,16 +60,12 @@ class Dispetcher(object):
         self.task_queue.extend(self.tasks)
         self.priority_dict = PriorityDict(priority_set)
         for t in tasks:
+            t.priority = t.priority if t.priority is not None else self.priority_dict.min_priority
             self.priority_dict[t.priority].increment()
-        from pprint import pprint
-        print('priority dict')
-        pprint(self.priority_dict)
 
 
     def run(self):
-        while True:
-            if len(self.task_queue) == 0:
-                break
+        while len(self.task_queue):            
             for pr in self.priority_dict:
                 task = self.task_queue.popleft()
                 if task.priority != pr:
