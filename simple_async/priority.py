@@ -49,20 +49,11 @@ class PriorityDict(object):
         return str(self.__dict__)
 
     def __iter__(self):
-        for pr in self.priority_set:
-            for _ in range(max(self.priority_set) - pr + 1):
-                if self[pr].value > 0:
-                    yield pr
-                else:
-                    break
+        while True:
+            for pr in self.priority_set:
+                for _ in range(max(self.priority_set) - pr + 1):
+                    if self[pr].value > 0:
+                        yield pr
+                    else:
+                        break
 
-
-if __name__ == '__main__':
-    kek = PriorityDict()
-    kek[1].increment()
-    kek[5].increment()
-    for i in kek:
-        print(i)
-        if kek[1].value:
-            kek[1].decrement()
-        kek[3].increment()

@@ -6,17 +6,21 @@ from collections import deque
 from datetime import datetime, timedelta
 
 from .priority import PriorityDict
-from .utils import ASleep, AChangePriority
+from .utils import ASleep, AChangePriority, Return
 
 
-class TaskInstance(object):
+class TaskInstance:
 
     def __init__(self, generator, func_name):
         self.generator = generator
         self.gen_inited = False  # нужен для реализации асинхроных ответов
         self.__priority = None
+
+        self.sleep = False
         self.last_time = datetime.now()
+        
         self.finish = False
+        self.childTask = None
         self.__name__ = func_name
 
     @property
@@ -32,17 +36,37 @@ class TaskInstance(object):
             raise ValueError('Priority is unsigned (Priority number must be 1-5)')
 
     def __call__(self):
-        if not self.gen_inited:
-            self.gen_inited = True
-            return next(self.generator)
+        res = None
         try:
-            res = self.generator.send(None)  # TODO реализация асинхроных ответов
-            return res
+            if self.childTask is not None and not self.childTask.finish:
+
+                res = self.childTask()
+
+                if self.childTask.finish:
+                    child_res = self.childTask.result
+                    self.childTask = None
+                    res = self.generator.send(child_res)
+                    if type(res) == Return:
+                        self.result = res.result
+                        res = self.result
+                        raise StopIteration
+            else:
+
+                res = next(self.generator)
+                if type(res) == Return:
+                    self.result = res.result
+                    res = self.result
+                    raise StopIteration
+                elif type(res) == TaskInstance:
+                    self.childTask = res
+
         except StopIteration:
             self.finish = True
 
+        return res
 
-class Task(object):
+
+class Task:
 
     def __init__(self, func):
         self.func = func
@@ -52,7 +76,7 @@ class Task(object):
         return TaskInstance(generator, self.func.__name__)
 
 
-class Dispetcher(object):
+class Dispetcher:
 
     def __init__(self, tasks, priority_set=None):
         self.tasks = tasks
@@ -64,29 +88,38 @@ class Dispetcher(object):
             self.priority_dict[t.priority].increment()
 
 
+
     def run(self):
-        while len(self.task_queue):            
-            for pr in self.priority_dict:
-                task = self.task_queue.popleft()
-                if task.priority != pr:
+        get_priority = iter(self.priority_dict)
+
+        while len(self.task_queue):
+
+            task = self.task_queue.popleft()
+            cycle_time = datetime.now()
+
+            if task.last_time <= cycle_time:
+                if task.sleep:
+                    task.sleep = False
+                    self.priority_dict[task.priority].increment()
+
+                if task.priority != next(get_priority):
                     self.task_queue.append(task)
                     continue
 
-                cycle_time = datetime.now()
+                res = task()
 
-                if task.last_time <= cycle_time:
-                    res = task()
-
-                    if task.finish:
-                        self.priority_dict[task.priority].decrement()
-
-                    if type(res) == ASleep:
-                        task.last_time = cycle_time + timedelta(seconds=res.seconds)
-                    elif type(res) == AChangePriority:
-                        self.priority_dict[task.priority].decrement()
-                        self.priority_dict[res.priority].increment()
-                        task.priority = res.priority
-                    else:
-                        pass
-                if not task.finish:
-                    self.task_queue.append(task)
+                if type(res) == ASleep:
+                    task.last_time = cycle_time + timedelta(seconds=res.seconds)
+                    task.sleep = True
+                    self.priority_dict[task.priority].decrement()
+                elif type(res) == AChangePriority:
+                    self.priority_dict[task.priority].decrement()
+                    self.priority_dict[res.priority].increment()
+                    task.priority = res.priority
+                else:
+                    pass
+            
+            if task.finish:
+                self.priority_dict[task.priority].decrement()
+            else:
+                self.task_queue.append(task)

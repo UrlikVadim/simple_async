@@ -2,27 +2,35 @@
 __author__ = 'urlik_vm'
 
 from simple_async.core import Task, Dispetcher
-from simple_async.utils import Async
+from simple_async.utils import Async, Return
 
 
 @Task
 def any_async_function(num):
     print('{1}Task {0} start'.format(num, ' ' * num * 2))
+    res = yield any_async_function2(num)
+    print('{1}Task {0} end: {2}'.format(num, ' ' * num * 2, res))
+    
+
+@Task
+def any_async_function2(num):
+    print('{1}CTask {0} start'.format(num, ' ' * num * 2))
     yield
     for i in range(2):
-        print('{2}Task {0}: --------- 1 cycle {1}'.format(num, i, ' ' * num * 2))
+        print('{2}CTask {0}: --------- 1 cycle {1}'.format(num, i, ' ' * num * 2))
         yield
 
     if num in (1, 2):
         yield Async.change_priority(4)
 
     if num in (2, 3):
-        yield Async.sleep(5)
+        yield Async.sleep(10)
 
     for i in range(2):
-        print('{2}Task {0}: +++++++++ 2 cycle {1}'.format(num, i, ' ' * num * 2))
+        print('{2}CTask {0}: +++++++++ 2 cycle {1}'.format(num, i, ' ' * num * 2))
         yield
-    print('{1}Task {0} end'.format(num, ' ' * num * 2))
+    print('{1}CTask {0} end'.format(num, ' ' * num * 2))
+    yield Return(num*10)
 
 
 if __name__ == '__main__':
