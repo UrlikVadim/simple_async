@@ -14,7 +14,7 @@ class TaskInstance:
     def __init__(self, generator, func_name):
         self.generator = generator
         self.gen_inited = False  # нужен для реализации асинхроных ответов
-        self.__priority = None
+        self.priority = None
 
         self.sleep = False
         self.last_time = datetime.now()
@@ -22,18 +22,6 @@ class TaskInstance:
         self.finish = False
         self.childTask = None
         self.__name__ = func_name
-
-    @property
-    def priority(self):
-        return self.__priority
-
-    @priority.setter
-    def priority(self, value):
-        value = int(value)
-        if 1 <= value <= 5:
-            self.__priority = value
-        else:
-            raise ValueError('Priority is unsigned (Priority number must be 1-5)')
 
     def __call__(self):
         res = None
