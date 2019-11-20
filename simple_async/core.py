@@ -69,7 +69,11 @@ class Dispetcher:
             t.priority = t.priority if t.priority is not None else self.priority_dict.min_priority
             self.priority_dict[t.priority].increment()
 
-
+    def append_task(self, t):
+        t.priority = t.priority if t.priority is not None else self.priority_dict.min_priority
+        self.priority_dict[t.priority].increment()
+        self.tasks.append(t)
+        self.task_queue.append(t)
 
     def run(self):
         get_priority = iter(self.priority_dict)
