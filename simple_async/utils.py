@@ -14,10 +14,11 @@ class AChangePriority:
     def __init__(self, prior):
         self.priority = int(prior)
 
-class Return:
-    __slots__ = ('result',)
-    def __init__(self, result):
-        self.result = result
+
+class AAppendTask:
+    __slots__ = ('task',)
+    def __init__(self, task):
+        self.task = task
 
 
 class Async:
@@ -29,3 +30,13 @@ class Async:
     @staticmethod
     def change_priority(prior):
         return AChangePriority(prior)
+    
+    @staticmethod
+    def append_task(task):
+        return AAppendTask(task)
+
+
+class Return:
+    __slots__ = ('result',)
+    def __init__(self, result):
+        self.result = result
