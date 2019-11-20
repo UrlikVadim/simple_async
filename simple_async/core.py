@@ -1,4 +1,3 @@
-# coding: utf-8
 __author__ = 'urlik_vm'
 
 import random
@@ -27,26 +26,21 @@ class TaskInstance:
         res = None
         try:
             if self.childTask is not None and not self.childTask.finish:
-
                 res = self.childTask()
-
-                if self.childTask.finish:
-                    child_res = self.childTask.result
-                    self.childTask = None
-                    res = self.generator.send(child_res)
-                    if type(res) == Return:
-                        self.result = res.result
-                        res = self.result
-                        raise StopIteration
             else:
-
                 res = next(self.generator)
-                if type(res) == Return:
-                    self.result = res.result
-                    res = self.result
-                    raise StopIteration
-                elif type(res) == TaskInstance:
-                    self.childTask = res
+
+            if self.childTask.finish:
+                child_res = self.childTask.result
+                self.childTask = None
+                res = self.generator.send(child_res)
+
+            if type(res) == Return:
+                self.result = res.result
+                res = self.result
+                raise StopIteration
+            elif type(res) == TaskInstance:
+                self.childTask = res
 
         except StopIteration:
             self.finish = True
