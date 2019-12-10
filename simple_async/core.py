@@ -30,7 +30,7 @@ class TaskInstance:
             else:
                 res = next(self.generator)
 
-            if self.childTask.finish:
+            if self.childTask is not None and self.childTask.finish:
                 child_res = self.childTask.result
                 self.childTask = None
                 res = self.generator.send(child_res)
