@@ -3,6 +3,7 @@ __author__ = 'urlik_vm'
 import random
 from collections import deque
 from datetime import datetime, timedelta
+from functools import wraps
 
 from .priority import PriorityDict
 from .utils import ASleep, AChangePriority, Return
@@ -47,16 +48,16 @@ class TaskInstance:
 
         return res
 
-
-class Task:
-
-    def __init__(self, func):
-        self.func = func
-
-    def __call__(self, *args, **kwargs):
-        generator = self.func(*args, **kwargs)
-        return TaskInstance(generator, self.func.__name__)
-
+def coroutine(priority=None):
+    def decor(func):
+        @wraps(func)
+        def wrap(*args, **kwargs):
+            generator = func(*args, **kwargs)
+            inst = TaskInstance(generator, func.__name__)            
+            inst.priority = priority
+            return inst
+        return wrap
+    return decor
 
 class Dispetcher:
 

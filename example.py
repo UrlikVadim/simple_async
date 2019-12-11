@@ -1,18 +1,18 @@
 # coding: utf-8
 __author__ = 'urlik_vm'
 
-from simple_async.core import Task, Dispetcher
+from simple_async.core import coroutine, Dispetcher
 from simple_async.utils import Async, Return
 
 
-@Task
+@coroutine()
 def any_async_function(num):
     print('{1}Task {0} start'.format(num, ' ' * num * 2))
     res = yield any_async_function2(num)
     print('{1}Task {0} end: {2}'.format(num, ' ' * num * 2, res))
     
 
-@Task
+@coroutine()
 def any_async_function2(num):
     print('{1}CTask {0} start'.format(num, ' ' * num * 2))
     yield
