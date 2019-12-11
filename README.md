@@ -1,5 +1,11 @@
-# simple_async
-simple async python library
+# simple_async python library
+
+### This framework is developed only for fun and scientific interest(reinforcing understanding of how asynchrony works)
+
+The feature of this framework is that the dispatcher is not a global object and non-blocking functions are also independent of the dispatcher instance
+
+dispatcher and task(coroutine) implemented in module "core"
+non-blocking flow function in module "utils"
 
 ```python
 
@@ -35,3 +41,4 @@ if __name__ == '__main__':
     print('=END=')
 
 ```
+
