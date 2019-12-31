@@ -15,22 +15,27 @@ def any_async_function(num):
 @coroutine()
 def any_async_function2(num):
     print('{1}CTask {0} start'.format(num, ' ' * num * 2))
-    yield
-    for i in range(2):
-        print('{2}CTask {0}: --------- 1 cycle {1}'.format(num, i, ' ' * num * 2))
+    try:
         yield
+        for i in range(2):
+            print('{2}CTask {0}: --------- 1 cycle {1}'.format(num, i, ' ' * num * 2))
+            yield
 
-    if num in (1, 2):
-        yield Async.change_priority(4)
+        if num in (1, 2):
+            yield Async.change_priority(4)
 
-    if num in (2, 3):
-        yield Async.sleep(10)
+        if num in (2, 3):
+            yield Async.sleep(10)
 
-    for i in range(2):
-        print('{2}CTask {0}: +++++++++ 2 cycle {1}'.format(num, i, ' ' * num * 2))
-        yield
-    print('{1}CTask {0} end'.format(num, ' ' * num * 2))
-    yield Return(num*10)
+        for i in range(2):
+            print('{2}CTask {0}: +++++++++ 2 cycle {1}'.format(num, i, ' ' * num * 2))
+            yield
+        print('{1}CTask {0} end'.format(num, ' ' * num * 2))
+        yield Return(num*10)
+    except ValueError:
+        pass
+    finally:
+        print('{1}CTask {0} finally'.format(num, ' ' * num * 2))
 
 
 if __name__ == '__main__':

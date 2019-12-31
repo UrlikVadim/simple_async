@@ -39,6 +39,7 @@ class TaskInstance:
             if type(res) == Return:
                 self.result = res.result
                 res = self.result
+                self.generator.close()
                 raise StopIteration
             elif type(res) == TaskInstance:
                 self.childTask = res
