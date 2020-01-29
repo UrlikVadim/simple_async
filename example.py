@@ -6,6 +6,12 @@ from simple_async.utils import Async, Return
 
 
 @coroutine()
+def added_task(num):
+    print('{1} ADDED Task {0} start'.format(num, ' ' * num * 2))
+    res = yield 
+    print('{1} ADDED Task {0} end: {2}'.format(num, ' ' * num * 2, res))
+
+@coroutine()
 def any_async_function(num):
     print('{1}Task {0} start'.format(num, ' ' * num * 2))
     res = yield any_async_function2(num)
@@ -23,6 +29,9 @@ def any_async_function2(num):
 
         if num in (1, 2):
             yield Async.change_priority(4)
+        else:
+            yield Async.append_task(added_task(num))
+
 
         if num in (2, 3):
             yield Async.sleep(10)

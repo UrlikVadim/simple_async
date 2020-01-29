@@ -27,10 +27,12 @@ class PriorityCounter(object):
 
 
 class PriorityDict(object):
+
     def __init__(self, priority_set=None):
         self.priority_set = set(priority_set) if priority_set else {1, 2, 3, 4, 5}
         self.min_priority = min(self.priority_set)
         self.max_priority = max(self.priority_set)
+        self._priority_iter = self.__infinityiter()
         for pr in self.priority_set:
             self[pr] = PriorityCounter()
 
@@ -48,7 +50,7 @@ class PriorityDict(object):
     def __repr__(self):
         return str(self.__dict__)
 
-    def __iter__(self):
+    def __infinityiter(self):
         while True:
             for pr in self.priority_set:
                 for _ in range(max(self.priority_set) - pr + 1):
@@ -56,4 +58,7 @@ class PriorityDict(object):
                         yield pr
                     else:
                         break
+    
+    def next_priority(self):
+        return next(self._priority_iter) 
 

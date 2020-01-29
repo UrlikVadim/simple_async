@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 from .priority import PriorityDict
-from .utils import ASleep, AChangePriority, Return
+from .utils import ASleep, AChangePriority, AAppendTask,Return
 
 
 class TaskInstance:
@@ -77,8 +77,7 @@ class Dispetcher:
         self.tasks.append(t)
         self.task_queue.append(t)
 
-    def run(self):
-        get_priority = iter(self.priority_dict)
+    def run(self):       
 
         while len(self.task_queue):
 
@@ -90,7 +89,7 @@ class Dispetcher:
                     task.sleep = False
                     self.priority_dict[task.priority].increment()
 
-                if task.priority != next(get_priority):
+                if task.priority != self.priority_dict.next_priority():
                     self.task_queue.append(task)
                     continue
 
@@ -104,6 +103,8 @@ class Dispetcher:
                     self.priority_dict[task.priority].decrement()
                     self.priority_dict[res.priority].increment()
                     task.priority = res.priority
+                elif type(res) == AAppendTask:
+                    self.append_task(res.task)
                 else:
                     pass
             
